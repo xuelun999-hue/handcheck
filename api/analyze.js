@@ -13,6 +13,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log('API调用开始，请求数据:', req.body);
+
     const { 
       image, 
       birthYear, 
@@ -26,6 +28,8 @@ export default async function handler(req, res) {
 
     // 检查环境变量
     const gatewayKey = process.env.VERCEL_AI_GATEWAY_KEY;
+    console.log('Gateway Key存在:', !!gatewayKey);
+    
     if (!gatewayKey) {
       throw new Error('VERCEL_AI_GATEWAY_KEY环境变量未设置');
     }
@@ -39,7 +43,9 @@ export default async function handler(req, res) {
       gender
     }, age);
 
-    // 使用Vercel AI Gateway正确端点
+    console.log('准备调用AI Gateway...');
+
+    // 使用更简单的文本分析（暂时不用图片）
     const response = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -51,38 +57,30 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: prompt
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: image
-                }
-              }
-            ]
+            content: prompt + '\n\n注意：由于技术限制，请基于用户提供的信息（年龄、性别、手部类型）进行通用手相分析。'
           }
         ],
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: 1500
       })
     });
 
+    console.log('AI Gateway响应状态:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('API错误:', response.status, errorText);
-      throw new Error(`AI分析失败: ${response.status}`);
+      console.error('AI Gateway错误:', response.status, errorText);
+      throw new Error(`AI Gateway失败: ${response.status}`);
     }
 
     const result = await response.json();
     const analysis = result.choices[0].message.content;
 
+    console.log('分析成功完成');
     res.status(200).json({ analysis });
 
   } catch (error) {
-    console.error('分析失败:', error);
+    console.error('分析失败详情:', error);
     res.status(500).json({ 
       error: '分析过程中发生错误，请稍后重试',
       details: error.message 
