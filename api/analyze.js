@@ -1,10 +1,10 @@
 import { streamText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 
-// 初始化Vercel AI Gateway
+// 初始化Vercel AI Gateway  
 const vercelGateway = createOpenAI({
   apiKey: process.env.VERCEL_AI_GATEWAY_KEY || 'vck_8Cd0aFXQatWaj3OKaWbrLDidPpdwkWYFOGKhPIAn7iFbwE5GhV3iuCCg',
-  baseURL: 'https://gateway.ai.cloudflare.com/v1/openai',
+  baseURL: 'https://gateway.vercel.ai/v1',
 });
 
 export default async function handler(req, res) {
