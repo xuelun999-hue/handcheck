@@ -12,7 +12,9 @@
     "test-search": "node scripts/test_search.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "ai": "^4.0.0",
+    "@ai-sdk/openai": "^1.0.0"
   },
   "devDependencies": {
     "openai": "^4.20.0",

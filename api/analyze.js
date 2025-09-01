@@ -41,15 +41,15 @@ export default async function handler(req, res) {
       knowledgeBase
     }, age);
 
-    // 使用OpenAI兼容的API调用
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // 使用Vercel AI Gateway正确端点
+    const response = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${gatewayKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'openai/gpt-4o-mini',
         messages: [
           {
             role: 'user',
