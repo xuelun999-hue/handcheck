@@ -452,8 +452,8 @@
             loadingState.style.display = 'block';
             
             try {
-                // Call simplified API for palm reading analysis
-                const analysis = await analyzeWithSimpleAPI({
+                // Call basic API for palm reading analysis
+                const analysis = await analyzeWithBasicAPI({
                     image: uploadedImage,
                     birthYear: parseInt(birthYear),
                     handType: handType,
@@ -522,8 +522,8 @@
         }
         
         // Vercel AI SDK streaming analysis
-        async function analyzeWithSimpleAPI(data) {
-            const response = await fetch('/api/analyze-simple', {
+        async function analyzeWithBasicAPI(data) {
+            const response = await fetch('/api/analyze-basic', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
