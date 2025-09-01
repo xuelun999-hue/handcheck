@@ -5,8 +5,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
@@ -26,23 +25,28 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '缺少必要参数' });
     }
 
+    // 检查环境变量
+    const gatewayKey = process.env.VERCEL_AI_GATEWAY_KEY;
+    if (!gatewayKey) {
+      throw new Error('VERCEL_AI_GATEWAY_KEY环境变量未设置');
+    }
+
     const currentYear = new Date().getFullYear();
     const age = currentYear - birthYear;
     
     const prompt = generateAnalysisPrompt({
-      image,
       birthYear,
       handType,
       analysisType,
       knowledgeBase
     }, age);
 
-    // 使用非流式响应，更稳定
-    const response = await fetch('https://gateway.vercel.ai/v1/chat/completions', {
+    // 使用OpenAI兼容的API调用
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.VERCEL_AI_GATEWAY_KEY || 'vck_8Cd0aFXQatWaj3OKaWbrLDidPpdwkWYFOGKhPIAn7iFbwE5GhV3iuCCg'}`
+        'Authorization': `Bearer ${gatewayKey}`
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
@@ -70,7 +74,8 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Gateway请求失败: ${response.status} - ${errorText}`);
+      console.error('API错误:', response.status, errorText);
+      throw new Error(`AI分析失败: ${response.status}`);
     }
 
     const result = await response.json();
