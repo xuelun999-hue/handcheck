@@ -615,8 +615,8 @@
                     console.log(`📚 找到 ${relevantKnowledge.length} 条相关知识`);
                 }
                 
-                // Call streaming API for palm reading analysis
-                await analyzeWithStreaming({
+                // Call API for palm reading analysis
+                const analysis = await analyzeWithAPI({
                     image: uploadedImage,
                     birthYear: parseInt(birthYear),
                     handType: handType,
@@ -624,7 +624,10 @@
                     knowledgeBase: relevantKnowledge
                 });
                 
-                // Scroll to results (already shown by streaming function)
+                // Show results
+                loadingState.style.display = 'none';
+                resultContainer.style.display = 'block';
+                resultContent.innerHTML = formatAnalysisReport(analysis);
                 resultContainer.scrollIntoView({ behavior: 'smooth' });
                 
             } catch (error) {
@@ -683,7 +686,7 @@
         }
         
         // Vercel AI SDK streaming analysis
-        async function analyzeWithStreaming(data) {
+        async function analyzeWithAPI(data) {
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {
@@ -693,41 +696,12 @@
             });
 
             if (!response.ok) {
-                throw new Error(`分析请求失败: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`分析请求失败: ${response.status} - ${errorData.details || '未知错误'}`);
             }
 
-            // 处理流式响应
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let analysisResult = '';
-            
-            // 显示结果容器
-            loadingState.style.display = 'none';
-            resultContainer.style.display = 'block';
-            resultContent.innerHTML = '<div id="streamingContent"></div>';
-            
-            const streamingContent = document.getElementById('streamingContent');
-            
-            try {
-                while (true) {
-                    const { done, value } = await reader.read();
-                    
-                    if (done) break;
-                    
-                    const chunk = decoder.decode(value);
-                    analysisResult += chunk;
-                    
-                    // 实时更新显示内容
-                    streamingContent.innerHTML = formatAnalysisReport(analysisResult);
-                    
-                    // 滚动到底部显示最新内容
-                    streamingContent.scrollTop = streamingContent.scrollHeight;
-                }
-            } finally {
-                reader.releaseLock();
-            }
-            
-            return analysisResult;
+            const result = await response.json();
+            return result.analysis;
         }
         
         function formatAnalysisReport(analysis) {

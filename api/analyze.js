@@ -1,4 +1,14 @@
 export default async function handler(req, res) {
+  // 处理CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -27,7 +37,7 @@ export default async function handler(req, res) {
       knowledgeBase
     }, age);
 
-    // 使用简单的fetch调用Vercel AI Gateway
+    // 使用非流式响应，更稳定
     const response = await fetch('https://gateway.vercel.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -54,52 +64,19 @@ export default async function handler(req, res) {
           }
         ],
         temperature: 0.7,
-        max_tokens: 2000,
-        stream: true
+        max_tokens: 2000
       })
     });
 
     if (!response.ok) {
-      throw new Error(`Gateway请求失败: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Gateway请求失败: ${response.status} - ${errorText}`);
     }
 
-    // 设置响应头用于流式传输
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    
-    // 处理流式响应
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
-            try {
-              const data = JSON.parse(line.substring(6));
-              const content = data.choices?.[0]?.delta?.content;
-              if (content) {
-                res.write(content);
-              }
-            } catch (e) {
-              // 忽略解析错误
-            }
-          }
-        }
-      }
-    } finally {
-      reader.releaseLock();
-    }
-    
-    res.end();
+    const result = await response.json();
+    const analysis = result.choices[0].message.content;
+
+    res.status(200).json({ analysis });
 
   } catch (error) {
     console.error('分析失败:', error);
