@@ -481,7 +481,29 @@
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', () => {
             initializeSupabase();
+            testSupabaseConnection();
         });
+        
+        // 测试Supabase连接
+        async function testSupabaseConnection() {
+            try {
+                const response = await fetch('/api/test-supabase');
+                const result = await response.json();
+                
+                if (result.supabase_configured) {
+                    console.log('✅ Supabase连接成功:', result);
+                    if (result.knowledge_base.total_entries > 0) {
+                        console.log(`📚 知识库已包含 ${result.knowledge_base.total_entries} 条记录`);
+                    } else {
+                        console.log('⚠️ 知识库为空，请运行 npm run process-knowledge');
+                    }
+                } else {
+                    console.log('❌ Supabase连接失败:', result);
+                }
+            } catch (error) {
+                console.log('❌ Supabase测试出错:', error);
+            }
+        }
         
         // Image upload handling
         const imageInput = document.getElementById('imageInput');

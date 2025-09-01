@@ -4,9 +4,9 @@ const CONFIG = {
     DEEPSEEK_API_KEY: 'sk-92d8f5c911e64cbaa87f99f76a9911af',
     DEEPSEEK_API_URL: 'https://api.deepseek.com/v1/chat/completions',
     
-    // Supabase配置 - 请填入您的实际信息
-    SUPABASE_URL: 'YOUR_SUPABASE_URL',           // 例如: https://xxx.supabase.co
-    SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY', // 公开密钥
+    // Supabase配置
+    SUPABASE_URL: 'https://unebxronbekorreiyddk.supabase.co',
+    SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuZWJ4cm9uYmVrb3JyZWl5ZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MDk3OTgsImV4cCI6MjA3MjI4NTc5OH0.nFPcyPRS9mrwC4SuJXjglD3uGj2kfhNPd9HGJUgvZMI',
     
     // OpenAI配置（用于向量搜索）
     OPENAI_API_KEY: 'YOUR_OPENAI_API_KEY',       // OpenAI API密钥
