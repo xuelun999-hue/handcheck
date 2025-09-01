@@ -76,9 +76,12 @@ export default async function handler(req, res) {
 
     console.log('准备调用Vercel AI Gateway...');
 
-    // 使用您的AI Gateway
+    // 使用您的AI Gateway - 修复密钥格式
     const gatewayKey = process.env.VERCEL_AI_GATEWAY_KEY || 'vck_8Cd0aFXQatWaj3OKaWbrLDidPpdwkWYFOGKhPIAn7iFbwE5GhV3iuCCg';
     
+    console.log('使用Gateway Key:', gatewayKey.substring(0, 15) + '...');
+    
+    // 先尝试简单的文本分析（不包含图片）
     const response = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -90,18 +93,7 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: prompt
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: image
-                }
-              }
-            ]
+            content: prompt + `\n\n用户信息：${age}岁${genderText}，${handTypeText}。请基于这些信息进行专业手相分析。`
           }
         ],
         temperature: 0.7,
