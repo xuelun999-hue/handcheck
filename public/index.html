@@ -280,23 +280,15 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">分析模块</label>
+                        <label class="form-label">性别</label>
                         <div class="radio-group">
                             <div class="radio-item">
-                                <input type="radio" id="career" name="analysisType" value="career" required>
-                                <label for="career">事业财运</label>
+                                <input type="radio" id="male" name="gender" value="male" required>
+                                <label for="male">男性</label>
                             </div>
                             <div class="radio-item">
-                                <input type="radio" id="love" name="analysisType" value="love" required>
-                                <label for="love">感情婚姻</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" id="health" name="analysisType" value="health" required>
-                                <label for="health">健康活力</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" id="comprehensive" name="analysisType" value="comprehensive" required>
-                                <label for="comprehensive">综合分析</label>
+                                <input type="radio" id="female" name="gender" value="female" required>
+                                <label for="female">女性</label>
                             </div>
                         </div>
                     </div>
@@ -328,159 +320,17 @@
         let supabaseClient = null;
         let knowledgeSearch = null;
         
-        // 初始化Supabase客户端
-        function initializeSupabase() {
-            if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY && 
-                CONFIG.SUPABASE_URL !== 'YOUR_SUPABASE_URL' && 
-                CONFIG.SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-                
-                supabaseClient = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-                knowledgeSearch = new PalmKnowledgeSearch();
-                console.log('✅ Supabase知识库已启用');
-            } else {
-                console.log('ℹ️ Supabase未配置，使用基础分析模式');
-            }
+        // 初始化应用
+        function initializeApp() {
+            console.log('🚀 AI手相分析师已启动');
         }
         
-        // 知识库搜索类
-        class PalmKnowledgeSearch {
-            
-            async searchRelevantKnowledge(analysisType, handType, age) {
-                if (!supabaseClient || !CONFIG.KNOWLEDGE_SEARCH.enabled) {
-                    return [];
-                }
-                
-                try {
-                    // 使用服务器端搜索API
-                    const response = await fetch('/api/search-knowledge', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            analysisType,
-                            handType,
-                            age
-                        })
-                    });
-
-                    if (!response.ok) {
-                        console.error('知识库搜索API失败:', response.status);
-                        return [];
-                    }
-
-                    const result = await response.json();
-                    return result.results || [];
-                } catch (error) {
-                    console.error('知识库搜索失败:', error);
-                    return [];
-                }
-            }
-            
-            generateSearchQueries(analysisType, handType, age) {
-                const queries = [];
-                
-                switch (analysisType) {
-                    case 'career':
-                        queries.push(
-                            { query: '事业线 工作 职业发展', category: 'career' },
-                            { query: '成功线 太阳线 事业成就', category: 'palm_lines' },
-                            { query: '木星丘 领导力 企图心', category: 'mounts' }
-                        );
-                        break;
-                    case 'love':
-                        queries.push(
-                            { query: '感情线 婚姻线 爱情', category: 'love' },
-                            { query: '金星丘 感情丰富', category: 'mounts' },
-                            { query: '月亮丘 情感敏感', category: 'mounts' }
-                        );
-                        break;
-                    case 'health':
-                        queries.push(
-                            { query: '生命线 健康 体质', category: 'health' },
-                            { query: '健康线 身体状况', category: 'palm_lines' },
-                            { query: '金星丘 生命力', category: 'mounts' }
-                        );
-                        break;
-                    case 'comprehensive':
-                        queries.push(
-                            { query: '生命线 智慧线 感情线', category: 'palm_lines' },
-                            { query: '八大丘位 性格特征', category: 'mounts' },
-                            { query: '特殊符号 星纹 岛纹', category: 'signs' }
-                        );
-                        break;
-                }
-                
-                // 添加年龄相关查询
-                if (age < 30) {
-                    queries.push({ query: '年轻人 潜力 发展', category: null });
-                } else if (age < 50) {
-                    queries.push({ query: '中年 事业 家庭', category: null });
-                } else {
-                    queries.push({ query: '成熟 智慧 经验', category: null });
-                }
-                
-                return queries;
-            }
-            
-            deduplicateResults(results) {
-                const seen = new Set();
-                return results
-                    .filter(item => {
-                        if (seen.has(item.id)) return false;
-                        seen.add(item.id);
-                        return true;
-                    })
-                    .sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
-            }
-            
-            formatKnowledgeForPrompt(knowledgeItems) {
-                if (!knowledgeItems || knowledgeItems.length === 0) {
-                    return '';
-                }
-                
-                let formatted = '\n\n[专业知识库参考]\n以下是相关的专业手相学知识，请在分析中参考使用：\n\n';
-                
-                knowledgeItems.forEach((item, index) => {
-                    formatted += `${index + 1}. ${item.title}\n`;
-                    formatted += `${item.content}\n`;
-                    if (item.keywords && item.keywords.length > 0) {
-                        formatted += `关键词: ${item.keywords.join(', ')}\n`;
-                    }
-                    formatted += '---\n\n';
-                });
-                
-                formatted += '请基于以上专业知识进行准确的手相分析。\n';
-                return formatted;
-            }
-        }
         
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', () => {
-            initializeSupabase();
-            testSupabaseConnection();
+            initializeApp();
         });
         
-        // 测试Supabase连接
-        async function testSupabaseConnection() {
-            try {
-                const response = await fetch('/api/test-supabase');
-                const result = await response.json();
-                
-                if (result.supabase_configured) {
-                    console.log('✅ Supabase连接成功:', result);
-                    if (result.knowledge_base.total_entries > 0) {
-                        console.log(`📚 知识库已包含 ${result.knowledge_base.total_entries} 条记录`);
-                    } else {
-                        console.log('⚠️ 知识库为空，请运行 npm run process-knowledge');
-                    }
-                } else {
-                    console.log('❌ Supabase连接失败:', result);
-                }
-            } catch (error) {
-                console.log('❌ Supabase测试出错:', error);
-            }
-        }
         
         // Image upload handling
         const imageInput = document.getElementById('imageInput');
@@ -595,32 +445,19 @@
             // Collect form data
             const birthYear = document.getElementById('birthYear').value;
             const handType = document.querySelector('input[name="handType"]:checked').value;
-            const analysisType = document.querySelector('input[name="analysisType"]:checked').value;
+            const gender = document.querySelector('input[name="gender"]:checked').value;
             
             // Show loading state
             userInfoStep.style.display = 'none';
             loadingState.style.display = 'block';
             
             try {
-                // 先搜索相关知识
-                let relevantKnowledge = [];
-                if (knowledgeSearch && CONFIG.KNOWLEDGE_SEARCH.enabled) {
-                    console.log('🔍 正在搜索相关知识...');
-                    relevantKnowledge = await knowledgeSearch.searchRelevantKnowledge(
-                        analysisType, 
-                        handType, 
-                        parseInt(birthYear)
-                    );
-                    console.log(`📚 找到 ${relevantKnowledge.length} 条相关知识`);
-                }
-                
-                // Call API for palm reading analysis
+                // Call API for palm reading analysis (无需知识库)
                 const analysis = await analyzeWithAPI({
                     image: uploadedImage,
                     birthYear: parseInt(birthYear),
                     handType: handType,
-                    analysisType: analysisType,
-                    knowledgeBase: relevantKnowledge
+                    gender: gender
                 });
                 
                 // Show results
