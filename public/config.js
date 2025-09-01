@@ -1,8 +1,8 @@
 // 应用配置文件
 const CONFIG = {
     // DeepSeek API配置
-    DEEPSEEK_API_KEY: 'sk-92d8f5c911e64cbaa87f99f76a9911af',
-    DEEPSEEK_API_URL: 'https://api.deepseek.com/v1/chat/completions',
+    DEEPSEEK_API_KEY: '',
+    DEEPSEEK_API_URL: '',
     
     // Supabase配置
     SUPABASE_URL: 'https://unebxronbekorreiyddk.supabase.co',
