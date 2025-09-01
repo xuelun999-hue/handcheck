@@ -5,8 +5,8 @@ const CONFIG = {
     DEEPSEEK_API_URL: '',
     
     // Supabase配置
-    SUPABASE_URL: 'https://unebxronbekorreiyddk.supabase.co',
-    SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuZWJ4cm9uYmVrb3JyZWl5ZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MDk3OTgsImV4cCI6MjA3MjI4NTc5OH0.nFPcyPRS9mrwC4SuJXjglD3uGj2kfhNPd9HGJUgvZMI',
+    SUPABASE_URL: '',
+    SUPABASE_ANON_KEY: '',
     
     // OpenAI配置（用于向量搜索）
     OPENAI_API_KEY: 'YOUR_OPENAI_API_KEY',       // OpenAI API密钥
