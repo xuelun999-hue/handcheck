@@ -2,6 +2,7 @@
   "name": "ai-palm-reading",
   "version": "1.0.0",
   "description": "AI手相分析师 - Vercel + Supabase驱动",
+  "type": "module",
   "main": "index.html",
   "scripts": {
     "dev": "vercel dev",
@@ -11,9 +12,7 @@
     "test-search": "node scripts/test_search.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "ai": "^3.0.0",
-    "@ai-sdk/openai": "^0.0.66"
+    "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
     "openai": "^4.20.0",

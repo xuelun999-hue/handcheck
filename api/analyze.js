@@ -1,12 +1,3 @@
-import { streamText } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
-
-// 初始化Vercel AI Gateway  
-const vercelGateway = createOpenAI({
-  apiKey: process.env.VERCEL_AI_GATEWAY_KEY || 'vck_8Cd0aFXQatWaj3OKaWbrLDidPpdwkWYFOGKhPIAn7iFbwE5GhV3iuCCg',
-  baseURL: 'https://gateway.vercel.ai/v1',
-});
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -36,21 +27,76 @@ export default async function handler(req, res) {
       knowledgeBase
     }, age);
 
-    // 使用Vercel AI Gateway进行流式响应
-    const result = await streamText({
-      model: vercelGateway('gpt-4o-mini'),
-      prompt: prompt,
-      temperature: 0.7,
-      maxTokens: 2000,
+    // 使用简单的fetch调用Vercel AI Gateway
+    const response = await fetch('https://gateway.vercel.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.VERCEL_AI_GATEWAY_KEY || 'vck_8Cd0aFXQatWaj3OKaWbrLDidPpdwkWYFOGKhPIAn7iFbwE5GhV3iuCCg'}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: prompt
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: image
+                }
+              }
+            ]
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+        stream: true
+      })
     });
+
+    if (!response.ok) {
+      throw new Error(`Gateway请求失败: ${response.status}`);
+    }
 
     // 设置响应头用于流式传输
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.setHeader('Transfer-Encoding', 'chunked');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     
-    // 流式返回结果
-    for await (const delta of result.textStream) {
-      res.write(delta);
+    // 处理流式响应
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+            try {
+              const data = JSON.parse(line.substring(6));
+              const content = data.choices?.[0]?.delta?.content;
+              if (content) {
+                res.write(content);
+              }
+            } catch (e) {
+              // 忽略解析错误
+            }
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
     }
     
     res.end();
