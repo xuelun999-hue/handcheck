@@ -50,7 +50,7 @@ vercel
 在Vercel Dashboard的Settings > Environment Variables中添加：
 
 ```
-GEMINI_API_KEY=your-google-gemini-api-key
+VERCEL_AI_GATEWAY_KEY=vck_your_gateway_key_here
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co  
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-key
 OPENAI_API_KEY=sk-your-openai-key

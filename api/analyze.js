@@ -1,9 +1,10 @@
 import { streamText } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
 
-// 初始化Gemini模型
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY,
+// 初始化Vercel AI Gateway
+const vercelGateway = createOpenAI({
+  apiKey: process.env.VERCEL_AI_GATEWAY_KEY || 'vck_8Cd0aFXQatWaj3OKaWbrLDidPpdwkWYFOGKhPIAn7iFbwE5GhV3iuCCg',
+  baseURL: 'https://gateway.ai.cloudflare.com/v1/openai',
 });
 
 export default async function handler(req, res) {
@@ -35,9 +36,9 @@ export default async function handler(req, res) {
       knowledgeBase
     }, age);
 
-    // 使用Vercel AI SDK进行流式响应
+    // 使用Vercel AI Gateway进行流式响应
     const result = await streamText({
-      model: google('gemini-1.5-flash'),
+      model: vercelGateway('gpt-4o-mini'),
       prompt: prompt,
       temperature: 0.7,
       maxTokens: 2000,
