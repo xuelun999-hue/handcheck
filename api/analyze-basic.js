@@ -74,17 +74,19 @@ export default async function handler(req, res) {
 
 请使用温暖专业的语气，避免宿命论表达。`;
 
-    console.log('准备调用DeepSeek API...');
+    console.log('准备调用Vercel AI Gateway...');
 
-    // 调用DeepSeek API
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    // 使用您的AI Gateway
+    const gatewayKey = process.env.VERCEL_AI_GATEWAY_KEY || 'vck_8Cd0aFXQatWaj3OKaWbrLDidPpdwkWYFOGKhPIAn7iFbwE5GhV3iuCCg';
+    
+    const response = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer sk-92d8f5c911e64cbaa87f99f76a9911af'
+        'Authorization': `Bearer ${gatewayKey}`
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'openai/gpt-4o-mini',
         messages: [
           {
             role: 'user',
@@ -107,12 +109,12 @@ export default async function handler(req, res) {
       })
     });
 
-    console.log('DeepSeek响应状态:', response.status);
+    console.log('AI Gateway响应状态:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('DeepSeek错误:', errorText);
-      throw new Error(`DeepSeek分析失败: ${response.status}`);
+      console.error('AI Gateway错误:', errorText);
+      throw new Error(`AI Gateway分析失败: ${response.status}`);
     }
 
     const result = await response.json();
