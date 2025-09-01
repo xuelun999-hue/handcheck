@@ -8,10 +8,10 @@ const path = require('path');
 const pdf = require('pdf-parse');
 const pdf2pic = require('pdf2pic');
 
-// 配置 - 请填入您的实际密钥
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY';
+// 配置 - 使用实际密钥
+const SUPABASE_URL = 'https://unebxronbekorreiyddk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuZWJ4cm9uYmVrb3JyZWl5ZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MDk3OTgsImV4cCI6MjA3MjI4NTc5OH0.nFPcyPRS9mrwC4SuJXjglD3uGj2kfhNPd9HGJUgvZMI';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'YOUR_OPENAI_API_KEY';
 
 // 初始化客户端
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
